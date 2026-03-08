@@ -1,0 +1,199 @@
+[
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000001",
+    "fields": {
+      "pr_number": 101,
+      "status": "complete",
+      "created_at": "2026-03-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000002",
+    "fields": {
+      "pr_number": 102,
+      "status": "analyzing",
+      "created_at": "2026-03-02T14:30:00Z"
+    }
+  },
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000003",
+    "fields": {
+      "pr_number": 103,
+      "status": "pending",
+      "created_at": "2026-03-03T09:15:00Z"
+    }
+  },
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000004",
+    "fields": {
+      "pr_number": 104,
+      "status": "error",
+      "created_at": "2026-03-04T16:45:00Z"
+    }
+  },
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000005",
+    "fields": {
+      "pr_number": 105,
+      "status": "complete",
+      "created_at": "2026-03-05T11:20:00Z"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000001",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000001",
+      "file_path": "src/auth/login.py",
+      "line_number": 42,
+      "severity": "security",
+      "title": "Hardcoded secret in source",
+      "body": "API key is hardcoded directly in the source file. This should be moved to environment variables.",
+      "suggestion": "Move this to environment variables or a secrets manager.",
+      "status": "approved"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000002",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000001",
+      "file_path": "src/api/views.py",
+      "line_number": 87,
+      "severity": "bug",
+      "title": "Missing error handling",
+      "body": "This API endpoint does not handle the case where the user is not found.",
+      "suggestion": "Wrap this in a try/except block and return a 404 response.",
+      "status": "pending"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000003",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000002",
+      "file_path": "src/utils/helpers.py",
+      "line_number": 15,
+      "severity": "perf",
+      "title": "Inefficient loop structure",
+      "body": "Using a list for membership checks inside a loop. This is O(n) per check.",
+      "suggestion": "Use a set instead of a list for O(1) lookups.",
+      "status": "pending"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000004",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000002",
+      "file_path": "src/models/user.py",
+      "line_number": 103,
+      "severity": "style",
+      "title": "Missing type annotation",
+      "body": "Function parameters lack type annotations, reducing code readability.",
+      "suggestion": "Add type hints for better maintainability.",
+      "status": "dismissed"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000005",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000003",
+      "file_path": "src/api/views.py",
+      "line_number": 201,
+      "severity": "security",
+      "title": "SQL injection vulnerability",
+      "body": "Raw SQL query uses string formatting with user input.",
+      "suggestion": "Use parameterized queries or the ORM instead.",
+      "status": "pending"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000006",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000004",
+      "file_path": "src/middleware/rate_limit.py",
+      "line_number": 58,
+      "severity": "bug",
+      "title": "Race condition possible",
+      "body": "Counter increment is not atomic, may cause incorrect rate limiting under load.",
+      "suggestion": "Add a lock or use an atomic operation to prevent concurrent access.",
+      "status": "pending"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000007",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000005",
+      "file_path": "config/settings.py",
+      "line_number": 12,
+      "severity": "security",
+      "title": "Debug mode enabled in production config",
+      "body": "DEBUG is set to True in what appears to be a production settings file.",
+      "suggestion": "Use environment variables to control DEBUG and ensure it is False in production.",
+      "status": "approved"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000008",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000005",
+      "file_path": "tests/test_auth.py",
+      "line_number": 34,
+      "severity": "style",
+      "title": "Unused variable detected",
+      "body": "Variable 'result' is assigned but never used in this test.",
+      "suggestion": "Remove the unused variable or use it in an assertion.",
+      "status": "dismissed"
+    }
+  },
+  {
+    "model": "reviews.draftcomment",
+    "pk": "c3d4e5f6-0001-4000-8000-000000000001",
+    "fields": {
+      "issue": "b2c3d4e5-0001-4000-8000-000000000001",
+      "body": "This API key should be stored in a .env file and loaded via django-environ or os.getenv().",
+      "posted": true,
+      "github_comment_id": "148230"
+    }
+  },
+  {
+    "model": "reviews.draftcomment",
+    "pk": "c3d4e5f6-0001-4000-8000-000000000002",
+    "fields": {
+      "issue": "b2c3d4e5-0001-4000-8000-000000000003",
+      "body": "Converting this to a set would improve lookup performance significantly.",
+      "posted": false,
+      "github_comment_id": ""
+    }
+  },
+  {
+    "model": "reviews.draftcomment",
+    "pk": "c3d4e5f6-0001-4000-8000-000000000003",
+    "fields": {
+      "issue": "b2c3d4e5-0001-4000-8000-000000000005",
+      "body": "Please use Django ORM or at minimum cursor.execute() with parameterized queries.",
+      "posted": true,
+      "github_comment_id": "293847"
+    }
+  },
+  {
+    "model": "reviews.draftcomment",
+    "pk": "c3d4e5f6-0001-4000-8000-000000000004",
+    "fields": {
+      "issue": "b2c3d4e5-0001-4000-8000-000000000007",
+      "body": "Set DEBUG = os.getenv('DEBUG', 'False') == 'True' to control this via environment.",
+      "posted": false,
+      "github_comment_id": ""
+    }
+  }
+]
