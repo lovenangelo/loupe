@@ -1,11 +1,24 @@
 {% extends "base.html" %}
-
 <!DOCTYPE html>
 {% block title %}Reviews - Loupe{% endblock %}
-{% block extra_head %}
-<meta name="description" content="Review details">
-{% endblock %}
-
+{% block extra_head %}<meta name="description" content="Review details">{% endblock %}
 {% block content %}
-<h1>Reviews</h1>
+    <div class="w-screen h-screen p-12">
+        <table class="flex w-full h-full items-start justify-center [&_th]:text-start [&_td]:text-start">
+            <tr class="flex w-full justify-center items-center">
+                <th colspan="3" class="border-b text-center">PR Reviews</th>
+            </tr>
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+            <tr>
+                <td>1234</td>
+                <td>Complete</td>
+                <td>Mar 9 2026</td>
+            </tr>
+        </tr>
+    </table>
+</div>
 {% endblock %}
