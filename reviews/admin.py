@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import PullRequest, Issue, DraftComment
+
+admin.site.register(PullRequest)
+admin.site.register(Issue)
+admin.site.register(DraftComment)
