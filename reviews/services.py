@@ -229,9 +229,33 @@ def run_pr_review(review_id):
             logger.exception("Failed to update review %s to error state", review_id)
 
 
-def post_comment_to_github(repo, pr_number, body):
-    """Post a comment to a GitHub PR via gh CLI."""
-    result = _run_cmd("gh", ["pr", "comment", str(pr_number), "--repo", repo, "--body", body], timeout=30)
+def _get_pr_head_sha(repo, pr_number):
+    """Get the latest commit SHA on the PR head branch."""
+    result = _run_cmd("gh", [
+        "pr", "view", str(pr_number), "--repo", repo,
+        "--json", "headRefOid", "--jq", ".headRefOid",
+    ], timeout=30)
     if result["returncode"] != 0:
-        raise RuntimeError(f"gh pr comment failed: {result['stderr']}")
+        raise RuntimeError(f"Failed to get PR head SHA: {result['stderr']}")
     return result["stdout"].strip()
+
+
+def post_comment_to_github(repo, pr_number, body, file_path, line_number):
+    """Post a review comment on a specific file/line in a GitHub PR."""
+    commit_id = _get_pr_head_sha(repo, pr_number)
+    payload = json.dumps({
+        "body": body,
+        "commit_id": commit_id,
+        "path": file_path,
+        "line": line_number,
+        "side": "RIGHT",
+    })
+    result = _run_cmd("gh", [
+        "api", f"repos/{repo}/pulls/{pr_number}/comments",
+        "--method", "POST",
+        "--input", "-",
+    ], stdin_data=payload, timeout=30)
+    if result["returncode"] != 0:
+        raise RuntimeError(f"gh api comment failed: {result['stderr']}")
+    response = json.loads(result["stdout"])
+    return str(response.get("id", ""))

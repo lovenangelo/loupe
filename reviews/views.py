@@ -141,6 +141,8 @@ def post_comment(request, comment_id):
             comment.issue.review.repo,
             comment.issue.review.pr_number,
             comment.body,
+            comment.issue.file_path,
+            comment.issue.line_number,
         )
         services.add_comment_to_github_pr(comment_id, result)
         messages.success(request, "Comment posted to GitHub.")
