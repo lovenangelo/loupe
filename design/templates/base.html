@@ -7,7 +7,8 @@
         </title>
         {% block extra_head %}{% endblock %}
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+              rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
         tailwind.config = {
@@ -65,21 +66,25 @@
     <body class="bg-background text-foreground min-h-screen">
         <nav class="bg-card border-b border-border">
             <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-                <a href="{% url 'reviews:index' %}" class="text-xl font-bold text-primary">Loupe</a>
-                <a href="{% url 'reviews:create' %}" class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">New Review</a>
+                <a href="{% url 'reviews:index' %}">
+                    {% load static %}
+                    <img src="{% static 'images/logo.png' %}"
+                         alt="Loupe"
+                         class="h-16 translate-y-2">
+                </a>
+                <a href="{% url 'reviews:create' %}"
+                   class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">New Review</a>
             </div>
         </nav>
-
         {% if messages %}
-        <div class="max-w-5xl mx-auto px-4 mt-4">
-            {% for message in messages %}
-            <div class="rounded-md px-4 py-3 mb-2 text-sm border {% if message.tags == 'success' %}bg-green-50 text-green-800 border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border-red-200{% else %}bg-accent text-accent-foreground border-border{% endif %}">
-                {{ message }}
+            <div class="max-w-5xl mx-auto px-4 mt-4">
+                {% for message in messages %}
+                    <div class="rounded-md px-4 py-3 mb-2 text-sm border {% if message.tags == 'success' %}bg-green-50 text-green-800 border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border-red-200{% else %}bg-accent text-accent-foreground border-border{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
         {% endif %}
-
         <main class="max-w-5xl mx-auto px-4 py-8">
             {% block content %}{% endblock %}
         </main>

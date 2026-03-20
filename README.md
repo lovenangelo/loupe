@@ -1,6 +1,10 @@
-# Loupe
+<p align="center">
+  <img src="design/static/images/logo.png" alt="Loupe" width="120">
+</p>
 
-Automated PR review tool powered by Claude — find bugs, security issues, and code smells, then post comments back to GitHub.
+<h1 align="center">Loupe</h1>
+
+<p align="center">Automated PR review tool powered by Claude — find bugs, security issues, and code smells, then post comments back to GitHub.</p>
 
 ## Prerequisites
 

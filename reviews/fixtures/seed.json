@@ -4,9 +4,9 @@
     "pk": "a1b2c3d4-0001-4000-8000-000000000001",
     "fields": {
       "repo": "acme/webapp",
-      "pr_number": 101,
+      "pr_number": 247,
       "status": "complete",
-      "created_at": "2026-03-01T10:00:00Z"
+      "created_at": "2026-03-18T10:00:00Z"
     }
   },
   {
@@ -14,9 +14,9 @@
     "pk": "a1b2c3d4-0001-4000-8000-000000000002",
     "fields": {
       "repo": "acme/webapp",
-      "pr_number": 102,
-      "status": "analyzing",
-      "created_at": "2026-03-02T14:30:00Z"
+      "pr_number": 251,
+      "status": "complete",
+      "created_at": "2026-03-19T14:30:00Z"
     }
   },
   {
@@ -24,42 +24,53 @@
     "pk": "a1b2c3d4-0001-4000-8000-000000000003",
     "fields": {
       "repo": "acme/webapp",
-      "pr_number": 103,
-      "status": "pending",
-      "created_at": "2026-03-03T09:15:00Z"
+      "pr_number": 254,
+      "status": "analyzing",
+      "created_at": "2026-03-20T09:15:00Z"
     }
   },
   {
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000004",
     "fields": {
-      "repo": "acme/webapp",
-      "pr_number": 104,
-      "status": "error",
-      "created_at": "2026-03-04T16:45:00Z"
+      "repo": "acme/api-gateway",
+      "pr_number": 89,
+      "status": "complete",
+      "created_at": "2026-03-20T16:45:00Z"
     }
   },
   {
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000005",
     "fields": {
-      "repo": "acme/webapp",
-      "pr_number": 105,
+      "repo": "acme/api-gateway",
+      "pr_number": 91,
       "status": "complete",
-      "created_at": "2026-03-05T11:20:00Z"
+      "created_at": "2026-03-21T08:20:00Z"
     }
   },
+  {
+    "model": "reviews.pullrequest",
+    "pk": "a1b2c3d4-0001-4000-8000-000000000006",
+    "fields": {
+      "repo": "acme/webapp",
+      "pr_number": 256,
+      "status": "pending",
+      "created_at": "2026-03-21T11:00:00Z"
+    }
+  },
+
   {
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000001",
     "fields": {
       "review": "a1b2c3d4-0001-4000-8000-000000000001",
-      "file_path": "src/auth/login.py",
-      "line_number": 42,
+      "file_path": "src/services/auth.ts",
+      "line_number": 34,
       "severity": "security",
-      "title": "Hardcoded secret in source",
-      "body": "API key is hardcoded directly in the source file. This should be moved to environment variables.",
-      "suggestion": "Move this to environment variables or a secrets manager.",
+      "title": "JWT secret hardcoded in source",
+      "body": "The JWT signing secret is hardcoded as a string literal:\n\n```ts\nconst token = jwt.sign(payload, 'my-super-secret-key-123', { expiresIn: '7d' });\n```\n\nThis exposes the secret in version control and makes key rotation impossible without a code deploy.",
+      "suggestion": "Load the secret from an environment variable:\n\n```ts\nconst JWT_SECRET = process.env.JWT_SECRET;\nif (!JWT_SECRET) throw new Error('JWT_SECRET is required');\n\nconst token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });\n```",
       "status": "approved"
     }
   },
@@ -68,54 +79,55 @@
     "pk": "b2c3d4e5-0001-4000-8000-000000000002",
     "fields": {
       "review": "a1b2c3d4-0001-4000-8000-000000000001",
-      "file_path": "src/api/views.py",
-      "line_number": 87,
+      "file_path": "src/controllers/users.ts",
+      "line_number": 72,
       "severity": "bug",
-      "title": "Missing error handling",
-      "body": "This API endpoint does not handle the case where the user is not found.",
-      "suggestion": "Wrap this in a try/except block and return a 404 response.",
-      "status": "pending"
+      "title": "Unhandled promise rejection in user lookup",
+      "body": "The `findUser` call is not wrapped in a try/catch. If the database query fails, the error propagates as an unhandled rejection and crashes the process:\n\n```ts\nconst user = await db.users.findUnique({ where: { id: req.params.id } });\nres.json(user);\n```\n\nAlso, if `user` is `null` this sends a `null` response with a 200 status.",
+      "suggestion": "Add error handling and a proper 404:\n\n```ts\ntry {\n  const user = await db.users.findUnique({ where: { id: req.params.id } });\n  if (!user) return res.status(404).json({ error: 'User not found' });\n  res.json(user);\n} catch (err) {\n  res.status(500).json({ error: 'Internal server error' });\n}\n```",
+      "status": "approved"
     }
   },
   {
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000003",
     "fields": {
-      "review": "a1b2c3d4-0001-4000-8000-000000000002",
-      "file_path": "src/utils/helpers.py",
-      "line_number": 15,
-      "severity": "perf",
-      "title": "Inefficient loop structure",
-      "body": "Using a list for membership checks inside a loop. This is O(n) per check.",
-      "suggestion": "Use a set instead of a list for O(1) lookups.",
+      "review": "a1b2c3d4-0001-4000-8000-000000000001",
+      "file_path": "src/controllers/users.ts",
+      "line_number": 105,
+      "severity": "style",
+      "title": "console.log left in production code",
+      "body": "There is a `console.log` statement left in the request handler:\n\n```ts\nconsole.log('user data:', userData);\n```\n\nThis leaks potentially sensitive user data to stdout in production.",
+      "suggestion": "Remove the `console.log` or replace it with a structured logger:\n\n```ts\nlogger.debug('Processing user update', { userId: userData.id });\n```",
       "status": "pending"
     }
   },
+
   {
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000004",
     "fields": {
       "review": "a1b2c3d4-0001-4000-8000-000000000002",
-      "file_path": "src/models/user.py",
-      "line_number": 103,
-      "severity": "style",
-      "title": "Missing type annotation",
-      "body": "Function parameters lack type annotations, reducing code readability.",
-      "suggestion": "Add type hints for better maintainability.",
-      "status": "dismissed"
+      "file_path": "src/services/orders.ts",
+      "line_number": 45,
+      "severity": "perf",
+      "title": "N+1 query in order listing",
+      "body": "Each order fetches its items individually inside a loop:\n\n```ts\nconst orders = await db.orders.findMany();\nfor (const order of orders) {\n  order.items = await db.orderItems.findMany({ where: { orderId: order.id } });\n}\n```\n\nFor 100 orders this fires 101 queries.",
+      "suggestion": "Use an `include` to eager-load the relation in a single query:\n\n```ts\nconst orders = await db.orders.findMany({\n  include: { items: true },\n});\n```",
+      "status": "approved"
     }
   },
   {
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000005",
     "fields": {
-      "review": "a1b2c3d4-0001-4000-8000-000000000003",
-      "file_path": "src/api/views.py",
-      "line_number": 201,
+      "review": "a1b2c3d4-0001-4000-8000-000000000002",
+      "file_path": "src/middleware/cors.ts",
+      "line_number": 8,
       "severity": "security",
-      "title": "SQL injection vulnerability",
-      "body": "Raw SQL query uses string formatting with user input.",
-      "suggestion": "Use parameterized queries or the ORM instead.",
+      "title": "CORS allows all origins",
+      "body": "The CORS middleware is configured with a wildcard origin:\n\n```ts\napp.use(cors({ origin: '*', credentials: true }));\n```\n\nUsing `origin: '*'` with `credentials: true` is a security risk — browsers will block this combination, but it also signals that the CORS policy hasn't been properly configured.",
+      "suggestion": "Restrict the origin to your actual frontend domains:\n\n```ts\napp.use(cors({\n  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://app.acme.com'],\n  credentials: true,\n}));\n```",
       "status": "pending"
     }
   },
@@ -123,27 +135,28 @@
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000006",
     "fields": {
-      "review": "a1b2c3d4-0001-4000-8000-000000000004",
-      "file_path": "src/middleware/rate_limit.py",
-      "line_number": 58,
+      "review": "a1b2c3d4-0001-4000-8000-000000000002",
+      "file_path": "src/utils/validate.ts",
+      "line_number": 22,
       "severity": "bug",
-      "title": "Race condition possible",
-      "body": "Counter increment is not atomic, may cause incorrect rate limiting under load.",
-      "suggestion": "Add a lock or use an atomic operation to prevent concurrent access.",
+      "title": "Type coercion bug in input validation",
+      "body": "The age check uses loose equality which causes unexpected coercion:\n\n```ts\nif (input.age == '0') {\n  return 'Age cannot be zero';\n}\n```\n\nThis means `0 == '0'` evaluates to `true`, but `null == '0'` is `false` — missing the null case.",
+      "suggestion": "Use strict equality and add a null check:\n\n```ts\nif (input.age === 0 || input.age == null) {\n  return 'A valid age is required';\n}\n```",
       "status": "pending"
     }
   },
+
   {
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000007",
     "fields": {
-      "review": "a1b2c3d4-0001-4000-8000-000000000005",
-      "file_path": "config/settings.py",
-      "line_number": 12,
+      "review": "a1b2c3d4-0001-4000-8000-000000000004",
+      "file_path": "src/routes/payments.py",
+      "line_number": 88,
       "severity": "security",
-      "title": "Debug mode enabled in production config",
-      "body": "DEBUG is set to True in what appears to be a production settings file.",
-      "suggestion": "Use environment variables to control DEBUG and ensure it is False in production.",
+      "title": "SQL injection via string interpolation",
+      "body": "User input is interpolated directly into a raw SQL query:\n\n```python\ncursor.execute(f\"SELECT * FROM payments WHERE user_id = '{user_id}'\")\n```\n\nAn attacker could pass `' OR 1=1 --` as the user_id to dump the entire payments table.",
+      "suggestion": "Use parameterized queries:\n\n```python\ncursor.execute(\"SELECT * FROM payments WHERE user_id = %s\", [user_id])\n```\n\nOr better yet, use the Django ORM:\n\n```python\nPayment.objects.filter(user_id=user_id)\n```",
       "status": "approved"
     }
   },
@@ -151,34 +164,64 @@
     "model": "reviews.issue",
     "pk": "b2c3d4e5-0001-4000-8000-000000000008",
     "fields": {
-      "review": "a1b2c3d4-0001-4000-8000-000000000005",
-      "file_path": "tests/test_auth.py",
-      "line_number": 34,
-      "severity": "style",
-      "title": "Unused variable detected",
-      "body": "Variable 'result' is assigned but never used in this test.",
-      "suggestion": "Remove the unused variable or use it in an assertion.",
-      "status": "dismissed"
+      "review": "a1b2c3d4-0001-4000-8000-000000000004",
+      "file_path": "src/routes/payments.py",
+      "line_number": 112,
+      "severity": "bug",
+      "title": "Missing decimal precision in currency calculation",
+      "body": "Floating-point arithmetic is used for monetary calculations:\n\n```python\ntotal = price * quantity * (1 - discount)\n```\n\nThis can produce rounding errors like `19.99 * 3 = 59.96999999999999`.",
+      "suggestion": "Use the `Decimal` type for currency:\n\n```python\nfrom decimal import Decimal\n\ntotal = Decimal(str(price)) * quantity * (1 - Decimal(str(discount)))\n```",
+      "status": "pending"
     }
   },
+
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000009",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000005",
+      "file_path": "src/handlers/webhook.py",
+      "line_number": 15,
+      "severity": "security",
+      "title": "Webhook signature not verified",
+      "body": "The webhook handler processes the payload without verifying the `X-Hub-Signature-256` header:\n\n```python\n@app.post('/webhook')\ndef handle_webhook(request):\n    payload = request.json()\n    process_event(payload)\n```\n\nAnyone who knows the endpoint URL can send forged events.",
+      "suggestion": "Verify the HMAC signature before processing:\n\n```python\nimport hmac, hashlib\n\ndef verify_signature(payload_body, signature, secret):\n    expected = 'sha256=' + hmac.new(secret.encode(), payload_body, hashlib.sha256).hexdigest()\n    return hmac.compare_digest(expected, signature)\n```",
+      "status": "approved"
+    }
+  },
+  {
+    "model": "reviews.issue",
+    "pk": "b2c3d4e5-0001-4000-8000-000000000010",
+    "fields": {
+      "review": "a1b2c3d4-0001-4000-8000-000000000005",
+      "file_path": "src/handlers/webhook.py",
+      "line_number": 41,
+      "severity": "perf",
+      "title": "Synchronous HTTP call blocks the event loop",
+      "body": "The webhook handler makes a synchronous `requests.post()` call inside an async handler:\n\n```python\nresponse = requests.post(callback_url, json=result)\n```\n\nThis blocks the event loop and prevents other requests from being processed.",
+      "suggestion": "Use an async HTTP client:\n\n```python\nimport httpx\n\nasync with httpx.AsyncClient() as client:\n    response = await client.post(callback_url, json=result)\n```",
+      "status": "pending"
+    }
+  },
+
   {
     "model": "reviews.draftcomment",
     "pk": "c3d4e5f6-0001-4000-8000-000000000001",
     "fields": {
       "issue": "b2c3d4e5-0001-4000-8000-000000000001",
-      "body": "This API key should be stored in a .env file and loaded via django-environ or os.getenv().",
+      "body": "Good catch — moved the JWT secret to an env var and added a startup check. See commit `a3f8c21`.",
       "posted": true,
-      "github_comment_id": "148230"
+      "github_comment_id": "1842937"
     }
   },
   {
     "model": "reviews.draftcomment",
     "pk": "c3d4e5f6-0001-4000-8000-000000000002",
     "fields": {
-      "issue": "b2c3d4e5-0001-4000-8000-000000000003",
-      "body": "Converting this to a set would improve lookup performance significantly.",
-      "posted": false,
-      "github_comment_id": ""
+      "issue": "b2c3d4e5-0001-4000-8000-000000000004",
+      "body": "Fixed — switched to `include` and confirmed with query logging that it's now 1 query instead of N+1. Response time dropped from ~800ms to ~50ms on the orders page.",
+      "posted": true,
+      "github_comment_id": "1843102"
     }
   },
   {
@@ -186,9 +229,9 @@
     "pk": "c3d4e5f6-0001-4000-8000-000000000003",
     "fields": {
       "issue": "b2c3d4e5-0001-4000-8000-000000000005",
-      "body": "Please use Django ORM or at minimum cursor.execute() with parameterized queries.",
-      "posted": true,
-      "github_comment_id": "293847"
+      "body": "We should lock this down before the next deploy. Adding the allowed origins from our `.env.production` file.",
+      "posted": false,
+      "github_comment_id": ""
     }
   },
   {
@@ -196,7 +239,17 @@
     "pk": "c3d4e5f6-0001-4000-8000-000000000004",
     "fields": {
       "issue": "b2c3d4e5-0001-4000-8000-000000000007",
-      "body": "Set DEBUG = os.getenv('DEBUG', 'False') == 'True' to control this via environment.",
+      "body": "Switched to parameterized queries across all three raw SQL calls in this file. Also added a `bandit` check to CI to catch future f-string SQL.",
+      "posted": true,
+      "github_comment_id": "1844501"
+    }
+  },
+  {
+    "model": "reviews.draftcomment",
+    "pk": "c3d4e5f6-0001-4000-8000-000000000005",
+    "fields": {
+      "issue": "b2c3d4e5-0001-4000-8000-000000000008",
+      "body": "Refactored all currency math to use `Decimal`. Need to double-check the discount calculation with the finance team before merging.",
       "posted": false,
       "github_comment_id": ""
     }
