@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load markdown_filters %}
 {% block title %}{{ issue.title }} - Loupe{% endblock %}
 {% block content %}
 <div class="flex items-center gap-3 mb-6">
@@ -31,7 +32,7 @@
         <h2 class="text-sm font-semibold text-muted-foreground">Description</h2>
         <button onclick="copyText(this, 'description-text')" class="text-xs text-muted-foreground hover:text-primary border border-border rounded px-2 py-0.5 hover:border-primary transition-colors">Copy</button>
     </div>
-    <p id="description-text" class="text-foreground">{{ issue.body }}</p>
+    <div id="description-text" class="text-foreground">{{ issue.body|render_code }}</div>
 </div>
 
 {% if issue.suggestion %}
@@ -40,7 +41,7 @@
         <h2 class="text-sm font-semibold text-accent-foreground">Suggestion</h2>
         <button onclick="copyText(this, 'suggestion-text')" class="text-xs text-muted-foreground hover:text-primary border border-border rounded px-2 py-0.5 hover:border-primary transition-colors">Copy</button>
     </div>
-    <p id="suggestion-text" class="text-accent-foreground">{{ issue.suggestion }}</p>
+    <div id="suggestion-text" class="text-accent-foreground">{{ issue.suggestion|render_code }}</div>
 </div>
 {% endif %}
 
