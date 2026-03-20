@@ -1,6 +1,6 @@
 # Loupe
 
-A Django-based code review tool that uses GitHub and Claude CLI to review pull requests.
+Automated PR review tool powered by Claude — find bugs, security issues, and code smells, then post comments back to GitHub.
 
 ## Prerequisites
 
