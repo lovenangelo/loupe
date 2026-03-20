@@ -3,6 +3,7 @@
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000001",
     "fields": {
+      "repo": "acme/webapp",
       "pr_number": 101,
       "status": "complete",
       "created_at": "2026-03-01T10:00:00Z"
@@ -12,6 +13,7 @@
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000002",
     "fields": {
+      "repo": "acme/webapp",
       "pr_number": 102,
       "status": "analyzing",
       "created_at": "2026-03-02T14:30:00Z"
@@ -21,6 +23,7 @@
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000003",
     "fields": {
+      "repo": "acme/webapp",
       "pr_number": 103,
       "status": "pending",
       "created_at": "2026-03-03T09:15:00Z"
@@ -30,6 +33,7 @@
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000004",
     "fields": {
+      "repo": "acme/webapp",
       "pr_number": 104,
       "status": "error",
       "created_at": "2026-03-04T16:45:00Z"
@@ -39,6 +43,7 @@
     "model": "reviews.pullrequest",
     "pk": "a1b2c3d4-0001-4000-8000-000000000005",
     "fields": {
+      "repo": "acme/webapp",
       "pr_number": 105,
       "status": "complete",
       "created_at": "2026-03-05T11:20:00Z"
