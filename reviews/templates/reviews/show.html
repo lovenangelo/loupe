@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}PR #{{ review.pr_number }} - Loupe{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-card-foreground">PR #{{ review.pr_number }}</h1>
+    <span class="inline-block px-3 py-1 text-sm font-medium rounded-full
+        {% if review.status == 'complete' %}bg-green-100 text-green-800
+        {% elif review.status == 'analyzing' %}bg-yellow-100 text-yellow-800
+        {% elif review.status == 'error' %}bg-red-100 text-red-800
+        {% else %}bg-secondary text-secondary-foreground{% endif %}">
+        {{ review.get_status_display }}
+    </span>
+</div>
+
+{% if review.status == 'analyzing' or review.status == 'pending' %}
+<div id="poll-banner" class="bg-yellow-50 border border-yellow-200 rounded-md px-4 py-3 mb-6 text-sm text-yellow-800 flex items-center gap-2">
+    <svg class="animate-spin h-4 w-4 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+    <span id="poll-text">Claude is analyzing this PR...</span>
+</div>
+<script>
+(function() {
+    const url = "{% url 'reviews:poll_status' review_id=review.id %}";
+    const interval = setInterval(function() {
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                if (data.status !== "analyzing" && data.status !== "pending") {
+                    clearInterval(interval);
+                    window.location.reload();
+                }
+            })
+            .catch(() => {});
+    }, 3000);
+})();
+</script>
+{% endif %}
+
+{% if review.status == 'error' and review.error_message %}
+<div class="bg-red-50 border border-red-200 rounded-md px-4 py-3 mb-6 text-sm text-red-800">
+    <strong>Error:</strong> {{ review.error_message }}
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-card rounded-lg border border-border p-4 shadow-sm">
+        <h2 class="text-sm font-semibold text-muted-foreground mb-3">Update Status</h2>
+        <form method="post" action="{% url 'reviews:update_status' review_id=review.id %}" class="flex gap-2">
+            {% csrf_token %}
+            {{ status_form.status }}
+            <button type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">Update</button>
+        </form>
+    </div>
+    <div class="bg-card rounded-lg border border-border p-4 shadow-sm">
+        <h2 class="text-sm font-semibold text-muted-foreground mb-3">Danger Zone</h2>
+        <form method="post" action="{% url 'reviews:delete' review_id=review.id %}" onsubmit="return confirm('Delete this review?')">
+            {% csrf_token %}
+            <button type="submit" class="bg-destructive text-destructive-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">Delete Review</button>
+        </form>
+    </div>
+</div>
+
+<div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-bold text-card-foreground">Issues</h2>
+    {% if review.issues.all %}
+    <a href="{% url 'reviews:issues' review_id=review.id %}" class="text-sm text-primary hover:underline">View all</a>
+    {% endif %}
+</div>
+
+{% if review.issues.all %}
+<div class="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
+    <table class="w-full text-left">
+        <thead class="bg-muted border-b border-border">
+            <tr>
+                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Title</th>
+                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Severity</th>
+                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">File</th>
+                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Status</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+            {% for issue in review.issues.all %}
+            <tr class="hover:bg-muted/50 transition-colors">
+                <td class="px-4 py-3">
+                    <a href="{% url 'reviews:issue_detail' issue_id=issue.id %}" class="text-primary hover:underline">{{ issue.title }}</a>
+                </td>
+                <td class="px-4 py-3">
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full
+                        {% if issue.severity == 'security' %}bg-red-100 text-red-800
+                        {% elif issue.severity == 'bug' %}bg-orange-100 text-orange-800
+                        {% elif issue.severity == 'perf' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                        {{ issue.get_severity_display }}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-sm font-mono"><a href="{{ issue.github_diff_url }}" target="_blank" rel="noopener" class="text-primary hover:underline">{{ issue.file_path }}:{{ issue.line_number }}</a></td>
+                <td class="px-4 py-3">
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full
+                        {% if issue.status == 'approved' %}bg-green-100 text-green-800
+                        {% elif issue.status == 'dismissed' %}bg-secondary text-secondary-foreground
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ issue.get_status_display }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+{% if review.status == 'complete' %}
+<p class="text-muted-foreground">No issues found for this review.</p>
+{% elif review.status != 'analyzing' %}
+<p class="text-muted-foreground">No issues yet.</p>
+{% endif %}
+{% endif %}
+{% endblock %}

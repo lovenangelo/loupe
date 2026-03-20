@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}New Review - Loupe{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold text-card-foreground mb-6">Create Review</h1>
+
+<div class="bg-card rounded-lg border border-border p-6 max-w-lg shadow-sm">
+    <form method="post" action="{% url 'reviews:create' %}">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="id_repo" class="block text-sm font-medium text-foreground mb-1">Repository</label>
+            {{ form.repo }}
+            {% if form.repo.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.repo.errors.0 }}</p>
+            {% endif %}
+        </div>
+        <div class="mb-4">
+            <label for="id_pr_number" class="block text-sm font-medium text-foreground mb-1">PR Number</label>
+            {{ form.pr_number }}
+            {% if form.pr_number.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.pr_number.errors.0 }}</p>
+            {% endif %}
+        </div>
+        <div class="mb-4">
+            <label for="id_review_prompt" class="block text-sm font-medium text-foreground mb-1">
+                Review Prompt <span class="text-muted-foreground font-normal">(optional — leave blank for default)</span>
+            </label>
+            {{ form.review_prompt }}
+            {% if form.review_prompt.errors %}
+            <p class="text-red-600 text-sm mt-1">{{ form.review_prompt.errors.0 }}</p>
+            {% endif %}
+        </div>
+        <button type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">Start Review</button>
+    </form>
+</div>
+<script>
+(function() {
+    const repoInput = document.getElementById('id_repo');
+    if (repoInput && !repoInput.value) {
+        repoInput.value = localStorage.getItem('loupe_repo') || '';
+    }
+})();
+</script>
+{% endblock %}
