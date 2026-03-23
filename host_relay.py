@@ -27,6 +27,16 @@ import sys
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# Load .env file from same directory as this script
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+if os.path.exists(_env_path):
+    with open(_env_path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                os.environ.setdefault(key.strip(), value.strip())
+
 ALLOWED_COMMANDS = {"gh", "claude"}
 RELAY_AUTH_TOKEN = os.environ.get("RELAY_AUTH_TOKEN", "")
 
@@ -34,15 +44,10 @@ RELAY_AUTH_TOKEN = os.environ.get("RELAY_AUTH_TOKEN", "")
 RATE_LIMIT = 30
 _request_timestamps: list[float] = []
 
-# Disallowed argument patterns (prevent dangerous flags)
+# Disallowed argument patterns (prevent token override)
 DANGEROUS_PATTERNS = [
-    r"--token",      # Don't allow overriding tokens
-    r"--auth-token",
-    r";\s*",         # Shell injection via semicolons
-    r"\|\s*",        # Shell injection via pipes
-    r"&&",           # Shell injection via &&
-    r"\$\(",         # Command substitution
-    r"`",            # Backtick command substitution
+    r"^--token",
+    r"^--auth-token",
 ]
 
 
@@ -105,6 +110,9 @@ class RelayHandler(BaseHTTPRequestHandler):
             return
 
         stdin_data = req.get("stdin")
+        if stdin_data is not None and not isinstance(stdin_data, str):
+            self._respond(400, {"error": "stdin must be a string"})
+            return
         timeout = min(req.get("timeout", 300), 300)  # Cap at 300s
 
         try:
