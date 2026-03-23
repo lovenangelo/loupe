@@ -10,3 +10,8 @@ services:
       - PYTHONUNBUFFERED=1
       # Points to the host relay for gh + claude commands
       - HOST_RELAY_URL=http://host.docker.internal:9111
+      # Security settings — set in .env file
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - RELAY_AUTH_TOKEN=${RELAY_AUTH_TOKEN}
