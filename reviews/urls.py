@@ -16,4 +16,5 @@ urlpatterns = [
     path("reviews/<uuid:review_id>/poll/", views.poll_status, name="poll_status"),
     path("comments/<uuid:comment_id>/edit/", views.edit_comment, name="edit_comment"),
     path("comments/<uuid:comment_id>/post/", views.post_comment, name="post_comment"),
+    path("reviews/<uuid:review_id>/report/", views.download_report, name="download_report"),
 ]

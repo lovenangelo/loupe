@@ -3,7 +3,8 @@ import threading
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.shortcuts import redirect, render
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
 from . import services
@@ -149,3 +150,16 @@ def post_comment(request, comment_id):
     except RuntimeError as e:
         messages.error(request, f"Failed to post: {e}")
     return redirect("reviews:issue_detail", issue_id=comment.issue_id)
+
+
+def download_report(request, review_id):
+    review = services.get_review(review_id)
+    issues = services.get_issues_for_review(review_id)
+    html = render_to_string("reviews/report.html", {
+        "review": review,
+        "issues": issues,
+    })
+    response = HttpResponse(html, content_type="text/html")
+    filename = f"loupe-{review.repo.replace('/', '-')}-PR{review.pr_number}.html"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

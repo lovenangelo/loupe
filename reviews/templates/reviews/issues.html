@@ -4,7 +4,18 @@
 <div class="flex items-center gap-3 mb-6">
     <a href="{% url 'reviews:show' review_id=review.id %}" class="text-primary hover:underline text-sm">&larr; Back to PR #{{ review.pr_number }}</a>
 </div>
-<h1 class="text-2xl font-bold text-card-foreground mb-6">Issues for PR #{{ review.pr_number }}</h1>
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-card-foreground">Issues for PR #{{ review.pr_number }}</h1>
+    {% if issues %}
+    <a href="{% url 'reviews:download_report' review_id=review.id %}"
+       class="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        Download Report
+    </a>
+    {% endif %}
+</div>
 
 {% if issues %}
 <div class="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
