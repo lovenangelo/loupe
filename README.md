@@ -36,7 +36,6 @@ Then edit `.env`:
 The host relay is a lightweight HTTP server that runs on your machine so the Docker container can execute `gh` and `claude` commands using your local credentials.
 
 ```bash
-export RELAY_AUTH_TOKEN=$(grep RELAY_AUTH_TOKEN .env | cut -d'=' -f2)
 python3 host_relay.py
 ```
 
