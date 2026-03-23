@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from .models import DEFAULT_REVIEW_PROMPT
 
@@ -14,12 +16,14 @@ class CreateReviewForm(forms.Form):
     )
     pr_number = forms.IntegerField(
         min_value=1,
+        max_value=999999999,
         widget=forms.NumberInput(
             attrs={"class": tw_input, "placeholder": "Enter PR number"}
         ),
     )
     review_prompt = forms.CharField(
         required=False,
+        max_length=5000,
         widget=forms.Textarea(
             attrs={
                 "class": tw_input,
@@ -28,6 +32,14 @@ class CreateReviewForm(forms.Form):
             }
         ),
     )
+
+    def clean_repo(self):
+        repo = self.cleaned_data["repo"].strip()
+        if not re.match(r"^[a-zA-Z0-9._-]+/[a-zA-Z0-9._-]+$", repo):
+            raise forms.ValidationError(
+                "Repository must be in owner/repo format (e.g. django/django)."
+            )
+        return repo
 
 
 class UpdateStatusForm(forms.Form):
@@ -54,6 +66,7 @@ class IssueStatusForm(forms.Form):
 
 class DraftCommentForm(forms.Form):
     body = forms.CharField(
+        max_length=65536,
         widget=forms.Textarea(
             attrs={
                 "class": tw_input,

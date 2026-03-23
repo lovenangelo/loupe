@@ -14,6 +14,7 @@ from .models import PullRequest, Issue, DraftComment, DEFAULT_REVIEW_PROMPT
 logger = logging.getLogger(__name__)
 
 HOST_RELAY_URL = os.environ.get("HOST_RELAY_URL", "")
+RELAY_AUTH_TOKEN = os.environ.get("RELAY_AUTH_TOKEN", "")
 
 
 def _run_cmd(cmd, args, stdin_data=None, timeout=300):
@@ -25,10 +26,13 @@ def _run_cmd(cmd, args, stdin_data=None, timeout=300):
             "stdin": stdin_data,
             "timeout": timeout,
         }).encode()
+        headers = {"Content-Type": "application/json"}
+        if RELAY_AUTH_TOKEN:
+            headers["Authorization"] = f"Bearer {RELAY_AUTH_TOKEN}"
         req = Request(
             HOST_RELAY_URL,
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
         )
         with urlopen(req, timeout=timeout + 10) as resp:
             result = json.loads(resp.read())
