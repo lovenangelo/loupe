@@ -14,21 +14,39 @@
 
 ## Getting Started
 
-### 1. Start the host relay
+### 1. Configure environment variables
+
+Copy the example env file and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `DJANGO_SECRET_KEY` | Random secret key for Django sessions/CSRF. Generate one with: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"` |
+| `DJANGO_DEBUG` | Set to `True` for local development, `False` for production |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames (default: `localhost,127.0.0.1`) |
+| `RELAY_AUTH_TOKEN` | Shared secret between the container and host relay. Generate one with: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"` |
+
+### 2. Start the host relay
 
 The host relay is a lightweight HTTP server that runs on your machine so the Docker container can execute `gh` and `claude` commands using your local credentials.
 
 ```bash
+export RELAY_AUTH_TOKEN=$(grep RELAY_AUTH_TOKEN .env | cut -d'=' -f2)
 python3 host_relay.py
 ```
 
-This starts the relay on port `9111` by default. To use a custom port:
+This starts the relay on `127.0.0.1:9111` by default. To use a custom port:
 
 ```bash
 python3 host_relay.py 9222
 ```
 
-### 2. Start the container
+### 3. Start the container
 
 In a separate terminal:
 
@@ -38,13 +56,13 @@ docker compose up --build
 
 This builds the image, mounts the SQLite database from your host, and starts the Django dev server on [http://localhost:8000](http://localhost:8000).
 
-### 3. Run migrations (first time only)
+### 4. Run migrations (first time only)
 
 ```bash
 docker compose exec web python manage.py migrate
 ```
 
-### 4. (Optional) Load seed data
+### 5. (Optional) Load seed data
 
 ```bash
 docker compose exec web python manage.py loaddata reviews/fixtures/seed.json
@@ -53,5 +71,19 @@ docker compose exec web python manage.py loaddata reviews/fixtures/seed.json
 ## Architecture
 
 - **Django app** runs inside Docker on port 8000
-- **Host relay** (`host_relay.py`) runs on the host on port 9111
+- **Host relay** (`host_relay.py`) runs on the host on `127.0.0.1:9111`
 - The container reaches the relay via `http://host.docker.internal:9111` to run `gh` and `claude` commands with the host's authentication
+
+## Security
+
+Loupe is designed for **local, single-user use**. Key security measures in place:
+
+- **Host relay** is bound to `127.0.0.1` only (not accessible from the network), requires a shared auth token, validates command arguments, and enforces rate limiting
+- **Django settings** load secrets from environment variables, default to `DEBUG=False`, and restrict `ALLOWED_HOSTS`
+- **Security headers** are enabled (XSS protection, content-type sniffing prevention, clickjacking protection, strict cookie policies)
+- **HTTPS-only settings** (HSTS, secure cookies) activate automatically when `DEBUG=False`
+- **Input validation** enforces `owner/repo` format and caps field lengths to prevent abuse
+- **CSRF protection** is enabled on all state-changing endpoints
+- The `.env` file is gitignored — never commit your tokens or secrets
+
+> **Important:** If you plan to expose this app beyond localhost, you should add user authentication and switch to a production-grade server (e.g. gunicorn behind nginx).
