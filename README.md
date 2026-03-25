@@ -45,7 +45,29 @@ This starts the relay on `127.0.0.1:9111` by default. To use a custom port:
 python3 host_relay.py 9222
 ```
 
-### 3. Start the container
+### 3. Create the database file (first time only)
+
+Docker requires the SQLite file to exist on the host before starting the container. Without it, Docker will create a directory instead of a file, causing errors.
+
+**macOS / Linux:**
+
+```bash
+touch db.sqlite3
+```
+
+**Windows (Command Prompt):**
+
+```cmd
+type nul > db.sqlite3
+```
+
+**Windows (PowerShell):**
+
+```powershell
+New-Item db.sqlite3 -ItemType File
+```
+
+### 4. Start the container
 
 In a separate terminal:
 
@@ -55,7 +77,7 @@ docker compose up --build
 
 This builds the image, mounts the SQLite database from your host, and starts the Django dev server on [http://localhost:8000](http://localhost:8000).
 
-### 4. Run migrations (first time only)
+### 5. Run migrations (first time only)
 
 ```bash
 docker compose exec web python manage.py migrate
