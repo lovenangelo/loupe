@@ -61,12 +61,6 @@ This builds the image, mounts the SQLite database from your host, and starts the
 docker compose exec web python manage.py migrate
 ```
 
-### 5. (Optional) Load seed data
-
-```bash
-docker compose exec web python manage.py loaddata reviews/fixtures/seed.json
-```
-
 ## Architecture
 
 - **Django app** runs inside Docker on port 8000
