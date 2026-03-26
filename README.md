@@ -70,7 +70,7 @@ Your review data is stored in `db.sqlite3` on your host machine, not inside the 
 
 ```bash
 docker compose pull
-docker compose up -d
+docker compose up -d --force-recreate
 docker compose exec web python manage.py migrate
 ```
 
