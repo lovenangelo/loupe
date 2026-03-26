@@ -1,0 +1,4 @@
+services:
+  web:
+    build: .
+    image: ghcr.io/lovenangelo/loupe:local

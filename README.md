@@ -12,7 +12,26 @@
 - `gh` CLI authenticated on your host machine (`gh auth login`)
 - `claude` CLI available on your host machine
 
-## Getting Started
+## Quick Start
+
+Clone the repo and run the setup script — it generates secrets, creates the database, pulls the pre-built image, and runs migrations:
+
+```bash
+git clone https://github.com/lovenangelo/loupe.git
+cd loupe
+python3 setup.py
+```
+
+Then start the host relay in a separate terminal:
+
+```bash
+python3 host_relay.py
+```
+
+That's it! The app will be running at [http://localhost:8000](http://localhost:8000).
+
+<details>
+<summary><strong>Manual Setup</strong> (if you prefer step-by-step)</summary>
 
 ### 1. Configure environment variables
 
@@ -69,19 +88,29 @@ New-Item db.sqlite3 -ItemType File
 
 ### 4. Start the container
 
-In a separate terminal:
-
 ```bash
-docker compose up --build
+docker compose pull
+docker compose up -d
 ```
-
-This builds the image, mounts the SQLite database from your host, and starts the Django dev server on [http://localhost:8000](http://localhost:8000).
 
 ### 5. Run migrations (first time only)
 
 ```bash
 docker compose exec web python manage.py migrate
 ```
+
+</details>
+
+<details>
+<summary><strong>Building locally</strong> (for development)</summary>
+
+If you want to build the image from source instead of pulling from the registry:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
+```
+
+</details>
 
 ## Architecture
 
