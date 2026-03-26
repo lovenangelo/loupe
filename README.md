@@ -20,7 +20,9 @@ No cloning or building required. Download the two files you need, then run:
 
 ```bash
 mkdir loupe && cd loupe
-curl -fsSLO https://raw.githubusercontent.com/lovenangelo/loupe/main/{docker-compose.yml,host_relay.py,setup.py}
+curl -fsSLO https://raw.githubusercontent.com/lovenangelo/loupe/main/docker-compose.yml
+curl -fsSLO https://raw.githubusercontent.com/lovenangelo/loupe/main/host_relay.py
+curl -fsSLO https://raw.githubusercontent.com/lovenangelo/loupe/main/setup.py
 python3 setup.py
 ```
 
