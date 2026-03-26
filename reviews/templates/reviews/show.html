@@ -92,33 +92,33 @@
 
 {% if issues %}
 <div class="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
-    <table class="w-full text-left">
+    <table class="w-full table-fixed text-left">
         <thead class="bg-muted border-b border-border">
             <tr>
-                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground w-10">
+                <th class="px-3 py-3 text-xs font-semibold text-muted-foreground w-10">
                     <input type="checkbox" id="select-all" class="rounded border-border cursor-pointer" title="Select all">
                 </th>
-                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Title</th>
-                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Severity</th>
-                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">File</th>
-                <th class="px-4 py-3 text-sm font-semibold text-muted-foreground">Status</th>
+                <th class="px-3 py-3 text-xs font-semibold text-muted-foreground" style="width:35%">Title</th>
+                <th class="px-3 py-3 text-xs font-semibold text-muted-foreground" style="width:12%">Severity</th>
+                <th class="px-3 py-3 text-xs font-semibold text-muted-foreground" style="width:30%">File</th>
+                <th class="px-3 py-3 text-xs font-semibold text-muted-foreground" style="width:13%">Status</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-border" id="issues-tbody">
             {% for issue in issues %}
             <tr class="transition-colors issue-row {% if issue.status == 'invalid' %}opacity-40{% else %}hover:bg-muted/50{% endif %}"
                 data-issue-id="{{ issue.id }}" data-status="{{ issue.status }}">
-                <td class="px-4 py-3">
+                <td class="px-3 py-3">
                     <input type="checkbox"
                         class="issue-checkbox rounded border-border cursor-pointer"
                         data-issue-id="{{ issue.id }}"
                         {% if issue.status == 'valid' %}checked{% endif %}
                         {% if issue.status == 'invalid' %}disabled{% endif %}>
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-3 py-3 text-sm">
                     <a href="{% url 'reviews:issue_detail' issue_id=issue.id %}" class="text-primary hover:underline">{{ issue.title }}</a>
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-3 py-3">
                     <span class="inline-block px-2 py-1 text-xs font-medium rounded-full
                         {% if issue.severity == 'security' %}bg-red-100 text-red-800
                         {% elif issue.severity == 'bug' %}bg-orange-100 text-orange-800
@@ -127,8 +127,8 @@
                         {{ issue.get_severity_display }}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-sm font-mono"><a href="{{ issue.github_diff_url }}" target="_blank" rel="noopener" class="text-primary hover:underline">{{ issue.file_path }}:{{ issue.line_number }}</a></td>
-                <td class="px-4 py-3">
+                <td class="px-3 py-3 text-xs font-mono truncate" title="{{ issue.file_path }}:{{ issue.line_number }}"><a href="{{ issue.github_diff_url }}" target="_blank" rel="noopener" class="text-primary hover:underline">{{ issue.file_path }}:{{ issue.line_number }}</a></td>
+                <td class="px-3 py-3">
                     <select
                         data-issue-id="{{ issue.id }}"
                         data-url="{% url 'reviews:issue_update_status' issue_id=issue.id %}"
