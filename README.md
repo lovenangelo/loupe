@@ -112,6 +112,24 @@ docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
 
 </details>
 
+## Docker Image
+
+The pre-built image is published to GitHub Container Registry on every push to `main`:
+
+```
+ghcr.io/lovenangelo/loupe:main
+```
+
+You can pull it directly:
+
+```bash
+docker pull ghcr.io/lovenangelo/loupe:main
+```
+
+Tagged releases are also available (e.g. `ghcr.io/lovenangelo/loupe:1.0.0`).
+
+The image is public and can be found at: https://github.com/lovenangelo/loupe/pkgs/container/loupe
+
 ## Architecture
 
 - **Django app** runs inside Docker on port 8000
