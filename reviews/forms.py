@@ -57,8 +57,8 @@ class UpdateStatusForm(forms.Form):
 class IssueStatusForm(forms.Form):
     status = forms.ChoiceField(
         choices=[
-            ("approved", "Approved"),
-            ("dismissed", "Dismissed"),
+            ("valid", "Valid"),
+            ("invalid", "Invalid"),
         ],
         widget=forms.Select(attrs={"class": tw_select}),
     )

@@ -77,8 +77,8 @@ class Issue(models.Model):
     status = models.CharField(
         choices=[
             ("pending", "Pending"),
-            ("approved", "Approved"),
-            ("dismissed", "Dismissed"),
+            ("valid", "Valid"),
+            ("invalid", "Invalid"),
         ],
         max_length=9,
     )

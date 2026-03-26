@@ -183,6 +183,18 @@ def post_comment(request, comment_id):
     return redirect("reviews:issue_detail", issue_id=comment.issue_id)
 
 
+@require_POST
+def bulk_post_comments(request, review_id):
+    issue_ids = request.POST.getlist("issue_ids")
+    if not issue_ids:
+        return JsonResponse({"error": "No issues selected"}, status=400)
+    try:
+        posted, failed = services.bulk_post_comments_to_github(review_id, issue_ids)
+        return JsonResponse({"posted": posted, "failed": failed})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
 def download_report(request, review_id):
     review = services.get_review(review_id)
     issues = services.get_issues_for_review(review_id)

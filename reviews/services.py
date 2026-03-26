@@ -101,7 +101,20 @@ def delete_review(review_id):
 # ---------------------------------------------------------------------------
 
 def get_issues_for_review(review_id):
-    return Issue.objects.filter(review_id=review_id).select_related("review").order_by("file_path", "line_number")
+    from django.db.models import Case, When, Value, IntegerField
+    return (
+        Issue.objects.filter(review_id=review_id)
+        .select_related("review")
+        .prefetch_related("comments")
+        .annotate(
+            status_order=Case(
+                When(status="invalid", then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("status_order", "file_path", "line_number")
+    )
 
 
 def get_issue(issue_id):
@@ -251,7 +264,7 @@ def _reconcile_issues(review, new_issues_data):
     """Match new Claude results against existing issues.
 
     - Existing issues that match (by title + file_path) are kept as-is.
-    - Existing issues NOT in the new results are marked dismissed (resolved).
+    - Existing issues NOT in the new results are marked invalid (resolved).
     - New issues not matching any existing one are created.
     """
     existing_issues = {
@@ -277,7 +290,7 @@ def _reconcile_issues(review, new_issues_data):
             issue.severity = severity
             issue.body = item.get("body", "")
             issue.suggestion = item.get("suggestion", "")
-            if issue.status == "dismissed":
+            if issue.status == "invalid":
                 issue.status = "pending"
             issue.save()
         else:
@@ -292,10 +305,10 @@ def _reconcile_issues(review, new_issues_data):
                 status="pending",
             ))
 
-    # Mark issues that Claude no longer reports as dismissed
+    # Mark issues that Claude no longer reports as invalid
     for key, issue in existing_issues.items():
-        if key not in seen_keys and issue.status != "dismissed":
-            issue.status = "dismissed"
+        if key not in seen_keys and issue.status != "invalid":
+            issue.status = "invalid"
             issue.save(update_fields=["status"])
 
     if to_create:
@@ -329,7 +342,7 @@ def run_pr_review(review_id):
         if is_rerun:
             kept, created = _reconcile_issues(review, issues_data)
             logger.info(
-                "Re-review %s: %d kept, %d new, resolved issues dismissed",
+                "Re-review %s: %d kept, %d new, resolved issues marked invalid",
                 review_id, kept, created,
             )
         else:
@@ -396,6 +409,64 @@ def post_comment_to_github(repo, pr_number, body, file_path, line_number):
         raise RuntimeError(f"gh api comment failed: {result['stderr']}")
     response = json.loads(result["stdout"])
     return str(response.get("id", ""))
+
+
+# ---------------------------------------------------------------------------
+# Bulk comment posting
+# ---------------------------------------------------------------------------
+
+def build_comment_body(issue):
+    """Build the comment body for an issue.
+
+    Uses the latest draft comment if available, otherwise combines
+    the issue description and suggestion.
+    """
+    latest_draft = (
+        issue.comments.filter(posted=False)
+        .order_by("-id")
+        .first()
+    )
+    if latest_draft:
+        return latest_draft.body
+
+    body = issue.body
+    if issue.suggestion:
+        body += "\n\nSuggestion:\n" + issue.suggestion
+    return body
+
+
+def bulk_post_comments_to_github(review_id, issue_ids):
+    """Post comments for multiple issues to GitHub PR."""
+    review = get_object_or_404(PullRequest, pk=review_id)
+    issues = Issue.objects.filter(
+        id__in=issue_ids, review=review
+    ).prefetch_related("comments")
+
+    posted = 0
+    failed = 0
+    for issue in issues:
+        comment_body = build_comment_body(issue)
+        try:
+            github_comment_id = post_comment_to_github(
+                review.repo,
+                review.pr_number,
+                comment_body,
+                issue.file_path,
+                issue.line_number,
+            )
+            # Save as a posted draft comment for record keeping
+            DraftComment.objects.create(
+                issue=issue,
+                body=comment_body,
+                posted=True,
+                github_comment_id=github_comment_id,
+            )
+            posted += 1
+        except Exception:
+            logger.exception("Failed to post comment for issue %s", issue.id)
+            failed += 1
+
+    return posted, failed
 
 
 # ---------------------------------------------------------------------------

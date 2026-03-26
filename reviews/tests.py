@@ -95,9 +95,9 @@ class ServiceTests(TestCase):
         self.assertEqual(len(created), 2)
 
     def test_update_issue_status(self):
-        services.update_issue_status(self.issue.id, "approved")
+        services.update_issue_status(self.issue.id, "valid")
         self.issue.refresh_from_db()
-        self.assertEqual(self.issue.status, "approved")
+        self.assertEqual(self.issue.status, "valid")
 
     def test_save_comment_draft(self):
         comment = services.save_comment_draft(self.issue.id, "Nice catch")
@@ -267,11 +267,11 @@ class ViewTests(TestCase):
     def test_update_issue_status(self):
         response = self.client.post(
             reverse("reviews:issue_update_status", args=[self.issue.id]),
-            {"status": "approved"},
+            {"status": "valid"},
         )
         self.assertRedirects(response, reverse("reviews:issue_detail", args=[self.issue.id]))
         self.issue.refresh_from_db()
-        self.assertEqual(self.issue.status, "approved")
+        self.assertEqual(self.issue.status, "valid")
 
     def test_create_comment(self):
         response = self.client.post(
@@ -363,11 +363,11 @@ class FormTests(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_update_status_form_invalid(self):
-        form = UpdateStatusForm(data={"status": "invalid"})
+        form = UpdateStatusForm(data={"status": "bogus"})
         self.assertFalse(form.is_valid())
 
     def test_issue_status_form_valid(self):
-        form = IssueStatusForm(data={"status": "approved"})
+        form = IssueStatusForm(data={"status": "valid"})
         self.assertTrue(form.is_valid())
 
     def test_issue_status_form_invalid(self):
@@ -459,14 +459,14 @@ class ReconcileIssuesTests(TestCase):
         self.issue1.refresh_from_db()
         self.assertEqual(self.issue1.body, "B1 updated")
 
-    def test_missing_issues_dismissed(self):
+    def test_missing_issues_invalid(self):
         new_data = [
             {"file_path": "a.py", "line_number": 10, "severity": "bug",
              "title": "Bug one", "body": "B1", "suggestion": "S1"},
         ]
         services._reconcile_issues(self.review, new_data)
         self.issue2.refresh_from_db()
-        self.assertEqual(self.issue2.status, "dismissed")
+        self.assertEqual(self.issue2.status, "invalid")
 
     def test_new_issues_created(self):
         new_data = [
@@ -480,8 +480,8 @@ class ReconcileIssuesTests(TestCase):
         self.assertEqual(created, 1)
         self.assertEqual(self.review.issues.count(), 3)
 
-    def test_dismissed_issue_reopened_on_match(self):
-        self.issue1.status = "dismissed"
+    def test_invalid_issue_reopened_on_match(self):
+        self.issue1.status = "invalid"
         self.issue1.save()
         new_data = [
             {"file_path": "a.py", "line_number": 10, "severity": "bug",
@@ -491,13 +491,13 @@ class ReconcileIssuesTests(TestCase):
         self.issue1.refresh_from_db()
         self.assertEqual(self.issue1.status, "pending")
 
-    def test_already_dismissed_stays_dismissed(self):
-        self.issue1.status = "dismissed"
+    def test_already_invalid_stays_invalid(self):
+        self.issue1.status = "invalid"
         self.issue1.save()
         new_data = []  # Claude reports no issues
         services._reconcile_issues(self.review, new_data)
         self.issue1.refresh_from_db()
-        self.assertEqual(self.issue1.status, "dismissed")
+        self.assertEqual(self.issue1.status, "invalid")
 
 
 class RerunReviewTests(TestCase):
@@ -569,19 +569,19 @@ class InlineIssueStatusTests(TestCase):
     def test_ajax_returns_json(self):
         response = self.client.post(
             reverse("reviews:issue_update_status", args=[self.issue.id]),
-            {"status": "approved"},
+            {"status": "valid"},
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["status"], "approved")
+        self.assertEqual(data["status"], "valid")
         self.issue.refresh_from_db()
-        self.assertEqual(self.issue.status, "approved")
+        self.assertEqual(self.issue.status, "valid")
 
     def test_non_ajax_redirects(self):
         response = self.client.post(
             reverse("reviews:issue_update_status", args=[self.issue.id]),
-            {"status": "dismissed"},
+            {"status": "invalid"},
         )
         self.assertRedirects(response, reverse("reviews:issue_detail", args=[self.issue.id]))
 
