@@ -14,7 +14,7 @@
 
 ## Quick Start (Docker Image)
 
-No cloning or building required. Download the two files you need, then run:
+No cloning or building required. Download the files you need, then run:
 
 **macOS / Linux:**
 
