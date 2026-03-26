@@ -54,15 +54,20 @@
     </form>
 </div>
 
+<style>
+.chat-content { white-space: pre-wrap; }
+.chat-content pre { white-space: pre; margin: 0.5rem 0; }
+.chat-content code { white-space: pre; }
+</style>
 <h2 class="text-lg font-bold text-card-foreground mb-4">Ask Claude</h2>
 
 <div class="bg-card rounded-lg border border-border shadow-sm mb-8">
     <div id="chat-messages" class="p-4 space-y-3 max-h-96 overflow-y-auto">
         {% for msg in chat_messages %}
         <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
-            <div class="max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap
-                {% if msg.role == 'user' %}bg-primary text-primary-foreground
-                {% else %}bg-muted text-foreground{% endif %}">{{ msg.content }}</div>
+            <div class="max-w-[80%] rounded-lg px-3 py-2 text-sm
+                {% if msg.role == 'user' %}bg-primary text-primary-foreground whitespace-pre-wrap
+                {% else %}bg-muted text-foreground chat-content{% endif %}">{% if msg.role == 'assistant' %}{{ msg.content|render_code }}{% else %}{{ msg.content }}{% endif %}</div>
         </div>
         {% empty %}
         <p id="chat-empty" class="text-sm text-muted-foreground text-center py-2">Ask a follow-up question about this issue.</p>
@@ -87,15 +92,37 @@
     const container = document.getElementById('chat-messages');
     const url = "{% url 'reviews:send_chat' issue_id=issue.id %}";
 
+    function renderCode(text) {
+        // Escape HTML
+        let html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Fenced code blocks: ```lang\n...\n```
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+            return '<pre class="bg-card rounded-md p-3 overflow-x-auto my-2">'
+                + '<code class="text-sm font-mono text-foreground">' + code.trimEnd() + '</code></pre>';
+        });
+        // Inline code: `code`
+        html = html.replace(/`([^`]+)`/g,
+            '<code class="bg-card text-sm font-mono px-1.5 py-0.5 rounded">$1</code>');
+        // Wrap remaining plain text lines in paragraphs (preserve line breaks outside code blocks)
+        html = html.replace(/^(?!<pre|<code)(.+)$/gm, function(_, line) {
+            return line;
+        });
+        return html;
+    }
+
     function addBubble(role, text) {
         const empty = document.getElementById('chat-empty');
         if (empty) empty.remove();
         const wrapper = document.createElement('div');
         wrapper.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start');
         const bubble = document.createElement('div');
-        bubble.className = 'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap '
-            + (role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground');
-        bubble.textContent = text;
+        if (role === 'user') {
+            bubble.className = 'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap bg-primary text-primary-foreground';
+            bubble.textContent = text;
+        } else {
+            bubble.className = 'max-w-[80%] rounded-lg px-3 py-2 text-sm bg-muted text-foreground chat-content';
+            bubble.innerHTML = renderCode(text);
+        }
         wrapper.appendChild(bubble);
         container.appendChild(wrapper);
         container.scrollTop = container.scrollHeight;
@@ -130,7 +157,7 @@
             if (data.error) {
                 thinkingBubble.textContent = 'Error: ' + data.error;
             } else {
-                thinkingBubble.textContent = data.content;
+                thinkingBubble.innerHTML = renderCode(data.content);
             }
         })
         .catch(() => {
