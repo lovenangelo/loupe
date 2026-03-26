@@ -54,6 +54,100 @@
     </form>
 </div>
 
+<h2 class="text-lg font-bold text-card-foreground mb-4">Ask Claude</h2>
+
+<div class="bg-card rounded-lg border border-border shadow-sm mb-8">
+    <div id="chat-messages" class="p-4 space-y-3 max-h-96 overflow-y-auto">
+        {% for msg in chat_messages %}
+        <div class="flex {% if msg.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
+            <div class="max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap
+                {% if msg.role == 'user' %}bg-primary text-primary-foreground
+                {% else %}bg-muted text-foreground{% endif %}">{{ msg.content }}</div>
+        </div>
+        {% empty %}
+        <p id="chat-empty" class="text-sm text-muted-foreground text-center py-2">Ask a follow-up question about this issue.</p>
+        {% endfor %}
+    </div>
+    <div class="border-t border-border p-3">
+        <form id="chat-form" class="flex gap-2">
+            {% csrf_token %}
+            <input id="chat-input" type="text" name="message" placeholder="Ask a question..."
+                class="flex-1 border border-border rounded-md px-3 py-2 text-sm bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                autocomplete="off">
+            <button id="chat-submit" type="submit" class="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">Send</button>
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const btn = document.getElementById('chat-submit');
+    const container = document.getElementById('chat-messages');
+    const url = "{% url 'reviews:send_chat' issue_id=issue.id %}";
+
+    function addBubble(role, text) {
+        const empty = document.getElementById('chat-empty');
+        if (empty) empty.remove();
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start');
+        const bubble = document.createElement('div');
+        bubble.className = 'max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap '
+            + (role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground');
+        bubble.textContent = text;
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+        container.scrollTop = container.scrollHeight;
+        return bubble;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (!message) return;
+
+        addBubble('user', message);
+        input.value = '';
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        const thinkingBubble = addBubble('assistant', 'Thinking...');
+        thinkingBubble.classList.add('animate-pulse');
+
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('csrfmiddlewaretoken', form.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(r => r.json())
+        .then(data => {
+            thinkingBubble.classList.remove('animate-pulse');
+            if (data.error) {
+                thinkingBubble.textContent = 'Error: ' + data.error;
+            } else {
+                thinkingBubble.textContent = data.content;
+            }
+        })
+        .catch(() => {
+            thinkingBubble.classList.remove('animate-pulse');
+            thinkingBubble.textContent = 'Failed to get response.';
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Send';
+            input.focus();
+        });
+    });
+
+    container.scrollTop = container.scrollHeight;
+})();
+</script>
+
 <h2 class="text-lg font-bold text-card-foreground mb-4">Comments</h2>
 
 {% for comment in issue.comments.all %}
