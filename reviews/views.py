@@ -175,7 +175,9 @@ def download_report(request, review_id):
         "review": review,
         "issues": issues,
     })
-    response = HttpResponse(html, content_type="text/html")
-    filename = f"loupe-{review.repo.replace('/', '-')}-PR{review.pr_number}.html"
+    from weasyprint import HTML
+    pdf = HTML(string=html).write_pdf()
+    filename = f"loupe-{review.repo.replace('/', '-')}-PR{review.pr_number}.pdf"
+    response = HttpResponse(pdf, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response

@@ -1,3 +1,4 @@
 Django==4.2.29
 django-browser-reload==1.21.0
 django-tailwind==3.6.0
+weasyprint==65.0
