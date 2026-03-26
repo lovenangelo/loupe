@@ -64,6 +64,16 @@ Tagged releases are also available (e.g. `ghcr.io/lovenangelo/loupe:1.0.0`).
 
 Browse tags: https://github.com/lovenangelo/loupe/pkgs/container/loupe
 
+## Updating
+
+Your review data is stored in `db.sqlite3` on your host machine, not inside the container — it's safe across updates.
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose exec web python manage.py migrate
+```
+
 ## How It Works
 
 Loupe runs as a Docker container but needs access to `gh` and `claude` on your host machine. The **host relay** is a lightweight HTTP server that bridges this gap:
