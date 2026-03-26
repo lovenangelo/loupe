@@ -14,6 +14,7 @@ urlpatterns = [
     path("issues/<uuid:issue_id>/", views.show_issue, name="issue_detail"),
     path("issues/<uuid:issue_id>/status/", views.update_issue_status, name="issue_update_status"),
     path("issues/<uuid:issue_id>/comment/", views.create_comment, name="create_comment"),
+    path("issues/<uuid:issue_id>/chat/", views.send_chat, name="send_chat"),
     path("reviews/<uuid:review_id>/poll/", views.poll_status, name="poll_status"),
     path("comments/<uuid:comment_id>/edit/", views.edit_comment, name="edit_comment"),
     path("comments/<uuid:comment_id>/post/", views.post_comment, name="post_comment"),

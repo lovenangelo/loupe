@@ -107,20 +107,35 @@ def review_issues(request, review_id):
 def show_issue(request, issue_id):
     issue = services.get_issue(issue_id)
     status_form = IssueStatusForm()
-    initial_body = f"**{issue.file_path}:{issue.line_number}**\n\n"
-    comment_form = DraftCommentForm(initial={"body": initial_body})
+    comment_form = DraftCommentForm()
+    chat_messages = services.get_chat_messages(issue_id)
     return render(request, "reviews/issue_detail.html", {
         "issue": issue,
         "status_form": status_form,
         "comment_form": comment_form,
+        "chat_messages": chat_messages,
     })
+
+
+@require_POST
+def send_chat(request, issue_id):
+    message = request.POST.get("message", "").strip()
+    if not message:
+        return JsonResponse({"error": "Message is required"}, status=400)
+    try:
+        reply = services.send_chat_message(issue_id, message)
+        return JsonResponse({"role": reply.role, "content": reply.content})
+    except RuntimeError as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @require_POST
 def update_issue_status(request, issue_id):
     form = IssueStatusForm(request.POST)
     if form.is_valid():
-        services.update_issue_status(issue_id, form.cleaned_data["status"])
+        issue = services.update_issue_status(issue_id, form.cleaned_data["status"])
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"status": issue.status})
         messages.success(request, f"Issue marked as {form.cleaned_data['status']}.")
     return redirect("reviews:issue_detail", issue_id=issue_id)
 
