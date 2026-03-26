@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("reviews/create/", views.create_review, name="create"),
     path("reviews/<uuid:review_id>/", views.show_review, name="show"),
+    path("reviews/<uuid:review_id>/rerun/", views.rerun_review, name="rerun"),
     path("reviews/<uuid:review_id>/delete/", views.delete_review, name="delete"),
     path("reviews/<uuid:review_id>/status/", views.update_status, name="update_status"),
     path("reviews/<uuid:review_id>/issues/", views.review_issues, name="issues"),

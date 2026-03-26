@@ -3,22 +3,30 @@ import uuid
 from django.db import models
 
 
+RESPONSE_FORMAT_INSTRUCTIONS = (
+    "Line numbers: diff lines are prefixed with L<num> (new file) or OLD-L<num> (removed). "
+    "Use the L-prefix number as line_number — never calculate it yourself.\n\n"
+    "Output ONLY a JSON array, no other text. Empty array [] if no issues.\n"
+    '[{"file_path":"path/to/file","line_number":42,"severity":"bug|security|perf",'
+    '"title":"Short title","body":"Explanation","suggestion":"Better approach"}]'
+)
+
+EXISTING_ISSUES_CONTEXT = (
+    "\n\nRe-review: keep ALL previous issues that still exist (same title + file_path). "
+    "Omit only if fixed/removed. Add new issues with new titles.\n\n"
+    "Previous issues:\n{existing_issues_json}\n"
+)
+
 DEFAULT_REVIEW_PROMPT = (
-    "Review this PR. The first part is the PR description/comments, the second part is the diff. "
-    "Check for: use of any, console.log, bad aggregation patterns. "
-    "Always suggest what is the better approach.\n\n"
-    "Return your findings as a JSON array with this exact format and nothing else:\n"
-    "[\n"
-    '  {\n'
-    '    "file_path": "path/to/file",\n'
-    '    "line_number": 42,\n'
-    '    "severity": "bug|security|perf",\n'
-    '    "title": "Short descriptive title",\n'
-    '    "body": "Detailed explanation of the issue",\n'
-    '    "suggestion": "What the better approach would be"\n'
-    '  }\n'
-    "]\n"
-    "Only output the JSON array, no other text."
+    "Expert code reviewer. Input: PR description then annotated diff.\n\n"
+    "Review all changed files for correctness, reliability, security only. Skip style/formatting.\n\n"
+    "Priority: 1) Bugs — logic errors, off-by-one, error swallowing, dead code, race conditions, "
+    "ORM misuse (N+1, missing prefetch_related) "
+    "2) Quality — unused imports/vars, loose types, missing validation "
+    "3) Security — permissions, secrets exposure, CSRF, SQL injection "
+    "4) Perf — unnecessary queries, missing indexes\n\n"
+    "Be specific. Suggest the fix.\n\n"
+    + RESPONSE_FORMAT_INSTRUCTIONS
 )
 
 

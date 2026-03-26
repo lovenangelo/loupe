@@ -44,6 +44,22 @@ def create_review(request):
     return render(request, "reviews/create.html", {"form": form})
 
 
+@require_POST
+def rerun_review(request, review_id):
+    review = services.get_review(review_id)
+    if review.status == "analyzing":
+        messages.warning(request, "Review is already in progress.")
+        return redirect("reviews:show", review_id=review_id)
+    thread = threading.Thread(
+        target=services.run_pr_review,
+        args=(review.id,),
+        daemon=True,
+    )
+    thread.start()
+    messages.success(request, "Re-review started. Refresh to see results.")
+    return redirect("reviews:show", review_id=review_id)
+
+
 def show_review(request, review_id):
     review = services.get_review(review_id)
     status_form = UpdateStatusForm(initial={"status": review.status})
