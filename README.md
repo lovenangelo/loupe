@@ -14,13 +14,17 @@
 
 ## Quick Start
 
-Clone the repo and run the setup script — it generates secrets, creates the database, pulls the pre-built image, and runs migrations:
-
 ```bash
 git clone https://github.com/lovenangelo/loupe.git
 cd loupe
 python3 setup.py
 ```
+
+This will:
+1. Generate secrets and create your `.env` file
+2. Create the SQLite database file
+3. Pull the pre-built Docker image from `ghcr.io/lovenangelo/loupe`
+4. Start the container and run migrations
 
 Then start the host relay in a separate terminal:
 
@@ -28,89 +32,17 @@ Then start the host relay in a separate terminal:
 python3 host_relay.py
 ```
 
-That's it! The app will be running at [http://localhost:8000](http://localhost:8000).
+The app will be running at [http://localhost:8000](http://localhost:8000).
 
-<details>
-<summary><strong>Manual Setup</strong> (if you prefer step-by-step)</summary>
+## How It Works
 
-### 1. Configure environment variables
+Loupe runs as a Docker container but needs access to `gh` and `claude` CLIs on your host machine. The **host relay** (`host_relay.py`) bridges this gap — it's a lightweight HTTP server that the container calls to execute commands using your local credentials.
 
-Copy the example env file and fill in your values:
-
-```bash
-cp .env.example .env
+```
+Browser → [Django in Docker :8000] → [Host Relay :9111] → gh / claude CLI
 ```
 
-Then edit `.env`:
-
-| Variable | Description |
-|----------|-------------|
-| `DJANGO_SECRET_KEY` | Random secret key for Django sessions/CSRF. Generate one with: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"` |
-| `DJANGO_DEBUG` | Set to `True` for local development, `False` for production |
-| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames (default: `localhost,127.0.0.1`) |
-| `RELAY_AUTH_TOKEN` | Shared secret between the container and host relay. Generate one with: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"` |
-
-### 2. Start the host relay
-
-The host relay is a lightweight HTTP server that runs on your machine so the Docker container can execute `gh` and `claude` commands using your local credentials.
-
-```bash
-python3 host_relay.py
-```
-
-This starts the relay on `127.0.0.1:9111` by default. To use a custom port:
-
-```bash
-python3 host_relay.py 9222
-```
-
-### 3. Create the database file (first time only)
-
-Docker requires the SQLite file to exist on the host before starting the container. Without it, Docker will create a directory instead of a file, causing errors.
-
-**macOS / Linux:**
-
-```bash
-touch db.sqlite3
-```
-
-**Windows (Command Prompt):**
-
-```cmd
-type nul > db.sqlite3
-```
-
-**Windows (PowerShell):**
-
-```powershell
-New-Item db.sqlite3 -ItemType File
-```
-
-### 4. Start the container
-
-```bash
-docker compose pull
-docker compose up -d
-```
-
-### 5. Run migrations (first time only)
-
-```bash
-docker compose exec web python manage.py migrate
-```
-
-</details>
-
-<details>
-<summary><strong>Building locally</strong> (for development)</summary>
-
-If you want to build the image from source instead of pulling from the registry:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
-```
-
-</details>
+This is why you need both the container and the relay running.
 
 ## Docker Image
 
@@ -120,15 +52,76 @@ The pre-built image is published to GitHub Container Registry on every push to `
 ghcr.io/lovenangelo/loupe:main
 ```
 
-You can pull it directly:
-
-```bash
-docker pull ghcr.io/lovenangelo/loupe:main
-```
-
 Tagged releases are also available (e.g. `ghcr.io/lovenangelo/loupe:1.0.0`).
 
-The image is public and can be found at: https://github.com/lovenangelo/loupe/pkgs/container/loupe
+Browse available tags: https://github.com/lovenangelo/loupe/pkgs/container/loupe
+
+<details>
+<summary><strong>Manual Setup</strong></summary>
+
+### 1. Configure environment variables
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+| Variable | Description |
+|----------|-------------|
+| `DJANGO_SECRET_KEY` | Random secret key. Generate: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"` |
+| `DJANGO_DEBUG` | `True` for local dev, `False` for production |
+| `DJANGO_ALLOWED_HOSTS` | Comma-separated hostnames (default: `localhost,127.0.0.1`) |
+| `RELAY_AUTH_TOKEN` | Shared secret for the relay. Generate: `python3 -c "import secrets; print(secrets.token_urlsafe(32))"` |
+
+### 2. Create the database file
+
+**macOS / Linux:**
+```bash
+touch db.sqlite3
+```
+
+**Windows (Command Prompt):**
+```cmd
+type nul > db.sqlite3
+```
+
+**Windows (PowerShell):**
+```powershell
+New-Item db.sqlite3 -ItemType File
+```
+
+### 3. Pull and start
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+### 4. Run migrations
+
+```bash
+docker compose exec web python manage.py migrate
+```
+
+### 5. Start the host relay
+
+```bash
+python3 host_relay.py
+```
+
+</details>
+
+<details>
+<summary><strong>Building from source</strong></summary>
+
+For development, build the image locally instead of pulling:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
+```
+
+</details>
 
 ## Architecture
 
