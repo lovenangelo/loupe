@@ -10,7 +10,7 @@ urlpatterns = [
     path("reviews/<uuid:review_id>/rerun/", views.rerun_review, name="rerun"),
     path("reviews/<uuid:review_id>/delete/", views.delete_review, name="delete"),
     path("reviews/<uuid:review_id>/status/", views.update_status, name="update_status"),
-    path("reviews/<uuid:review_id>/issues/", views.review_issues, name="issues"),
+
     path("issues/<uuid:issue_id>/", views.show_issue, name="issue_detail"),
     path("issues/<uuid:issue_id>/status/", views.update_issue_status, name="issue_update_status"),
     path("issues/<uuid:issue_id>/comment/", views.create_comment, name="create_comment"),

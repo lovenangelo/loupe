@@ -253,12 +253,7 @@ class ViewTests(TestCase):
         self.review.refresh_from_db()
         self.assertEqual(self.review.status, "complete")
 
-    def test_review_issues(self):
-        response = self.client.get(reverse("reviews:issues", args=[self.review.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "reviews/issues.html")
-
-    def test_show_issue(self):
+def test_show_issue(self):
         response = self.client.get(reverse("reviews:issue_detail", args=[self.issue.id]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "reviews/issue_detail.html")

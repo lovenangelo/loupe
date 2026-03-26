@@ -62,9 +62,11 @@ def rerun_review(request, review_id):
 
 def show_review(request, review_id):
     review = services.get_review(review_id)
+    issues = services.get_issues_for_review(review_id)
     status_form = UpdateStatusForm(initial={"status": review.status})
     return render(request, "reviews/show.html", {
         "review": review,
+        "issues": issues,
         "status_form": status_form,
     })
 
@@ -92,16 +94,6 @@ def poll_status(request, review_id):
         "issue_count": review.issues.count(),
     })
 
-
-def review_issues(request, review_id):
-    review = services.get_review(review_id)
-    issues = services.get_issues_for_review(review_id)
-    paginator = Paginator(issues, 10)
-    page = paginator.get_page(request.GET.get("page"))
-    return render(request, "reviews/issues.html", {
-        "review": review,
-        "issues": page,
-    })
 
 
 def show_issue(request, issue_id):
