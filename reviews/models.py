@@ -106,3 +106,22 @@ class DraftComment(models.Model):
 
     def __str__(self):
         return f"Comment on {self.issue.title}"
+
+
+class ChatMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    issue = models.ForeignKey(
+        Issue, on_delete=models.CASCADE, related_name="chat_messages"
+    )
+    role = models.CharField(
+        choices=[("user", "User"), ("assistant", "Assistant")],
+        max_length=9,
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.role}: {self.content[:50]}"

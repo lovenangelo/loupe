@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
 from .models import (
-    PullRequest, Issue, DraftComment,
+    PullRequest, Issue, DraftComment, ChatMessage,
     DEFAULT_REVIEW_PROMPT, RESPONSE_FORMAT_INSTRUCTIONS, EXISTING_ISSUES_CONTEXT,
 )
 
@@ -396,3 +396,44 @@ def post_comment_to_github(repo, pr_number, body, file_path, line_number):
         raise RuntimeError(f"gh api comment failed: {result['stderr']}")
     response = json.loads(result["stdout"])
     return str(response.get("id", ""))
+
+
+# ---------------------------------------------------------------------------
+# Issue Chat
+# ---------------------------------------------------------------------------
+
+def get_chat_messages(issue_id):
+    return ChatMessage.objects.filter(issue_id=issue_id).order_by("created_at")
+
+
+def send_chat_message(issue_id, user_message):
+    """Save user message, send to Claude with issue context + history, save response."""
+    issue = get_object_or_404(
+        Issue.objects.select_related("review"),
+        pk=issue_id,
+    )
+
+    ChatMessage.objects.create(issue=issue, role="user", content=user_message)
+
+    # Build context: issue details + conversation history
+    history = list(issue.chat_messages.all().values_list("role", "content"))
+    conversation = "\n".join(f"{role}: {content}" for role, content in history)
+
+    prompt = (
+        f"You are helping a developer understand a code review issue.\n\n"
+        f"Issue: {issue.title}\n"
+        f"File: {issue.file_path}:{issue.line_number}\n"
+        f"Severity: {issue.severity}\n"
+        f"Description: {issue.body}\n"
+        f"Suggestion: {issue.suggestion}\n\n"
+        f"Conversation so far:\n{conversation}\n\n"
+        f"Respond helpfully and concisely to the user's latest message."
+    )
+
+    result = _run_cmd("claude", ["-p", prompt], timeout=120)
+    if result["returncode"] != 0:
+        raise RuntimeError(f"claude failed: {result['stderr']}")
+
+    assistant_content = result["stdout"].strip()
+    msg = ChatMessage.objects.create(issue=issue, role="assistant", content=assistant_content)
+    return msg
