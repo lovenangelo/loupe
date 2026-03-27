@@ -129,7 +129,7 @@
                         {{ issue.get_severity_display }}
                     </span>
                 </td>
-                <td class="px-3 py-3 text-xs font-mono truncate" title="{{ issue.file_path }}:{{ issue.line_number }}"><a href="{{ issue.github_diff_url }}" target="_blank" rel="noopener" class="text-primary hover:underline">{{ issue.file_path }}:{{ issue.line_number }}</a></td>
+                <td class="px-3 py-3 text-xs font-mono" title="{{ issue.file_path }}:{{ issue.line_number }}"><div class="truncate max-w-[250px]"><a href="{{ issue.github_diff_url }}" target="_blank" rel="noopener" class="text-primary hover:underline">{{ issue.file_path }}:{{ issue.line_number }}</a></div></td>
                 <td class="px-3 py-3">
                     <select
                         data-issue-id="{{ issue.id }}"
