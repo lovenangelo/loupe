@@ -67,7 +67,6 @@
       <th style="width:40%">Title</th>
       <th>Severity</th>
       <th>File</th>
-      <th>Status</th>
     </tr>
   </thead>
   <tbody>
@@ -76,7 +75,6 @@
       <td><a href="#issue-{{ forloop.counter }}" style="color:#2563eb; text-decoration:none;">{{ issue.title }}</a></td>
       <td><span class="badge severity-{{ issue.severity }}">{{ issue.get_severity_display }}</span></td>
       <td style="font-family:monospace; font-size:0.8rem;">{{ issue.file_path }}:{{ issue.line_number }}</td>
-      <td><span class="badge status-{{ issue.status }}">{{ issue.get_status_display }}</span></td>
     </tr>
     {% endfor %}
   </tbody>
@@ -88,7 +86,6 @@
   <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
     <h3>{{ forloop.counter }}. {{ issue.title }}</h3>
     <span class="badge severity-{{ issue.severity }}">{{ issue.get_severity_display }}</span>
-    <span class="badge status-{{ issue.status }}">{{ issue.get_status_display }}</span>
   </div>
   <p class="issue-meta">
     <a href="{{ issue.github_diff_url }}">{{ issue.file_path }}:{{ issue.line_number }}</a>
