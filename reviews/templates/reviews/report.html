@@ -6,163 +6,85 @@
 <title>PR Review Report - {{ review.repo }} #{{ review.pr_number }}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; color: #0d1117; background: #fff; padding: 0; line-height: 1.6; }
-
-  /* Header */
-  .header { background: #0d1117; color: #fff; padding: 2.5rem 3rem; }
-  .header-inner { max-width: 860px; margin: 0 auto; }
-  .header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 0.5rem; }
-  .header-meta { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8125rem; color: #8b949e; flex-wrap: wrap; }
-  .header-meta a { color: #58a6ff; text-decoration: none; }
-  .header-meta .separator { color: #30363d; }
-  .pr-badge { display: inline-flex; align-items: center; gap: 0.375rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 0.25rem 0.625rem; font-size: 0.8125rem; font-family: 'SF Mono', Monaco, Consolas, monospace; color: #e6edf3; }
-
-  /* Content */
-  .content { max-width: 860px; margin: 0 auto; padding: 2rem 3rem 3rem; }
-
-  /* Stats */
-  .stats { display: flex; gap: 0.75rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
-  .stat-card { flex: 1; min-width: 120px; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 1rem 1.25rem; text-align: center; }
-  .stat-card .stat-number { display: block; font-size: 1.75rem; font-weight: 700; color: #0d1117; line-height: 1.2; }
-  .stat-card .stat-label { font-size: 0.75rem; font-weight: 500; color: #656d76; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
-  .stat-card.stat-total { background: #0d1117; border-color: #0d1117; }
-  .stat-card.stat-total .stat-number { color: #fff; }
-  .stat-card.stat-total .stat-label { color: #8b949e; }
-
-  /* Section headings */
-  .section-heading { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #656d76; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #d0d7de; }
-
-  /* Table */
-  table { width: 100%; border-collapse: collapse; margin-bottom: 2.5rem; font-size: 0.8125rem; }
-  thead th { background: #f6f8fa; text-align: left; padding: 0.5rem 0.75rem; font-weight: 600; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #656d76; border-bottom: 1px solid #d0d7de; }
-  tbody td { padding: 0.625rem 0.75rem; border-bottom: 1px solid #d8dee4; vertical-align: middle; color: #1f2328; }
-  tbody tr:last-child td { border-bottom: none; }
-  .table-wrapper { border: 1px solid #d0d7de; border-radius: 8px; overflow: hidden; margin-bottom: 2.5rem; }
-
-  /* Badges */
-  .badge { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 999px; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.02em; }
-  .severity-security { background: #FFEBE9; color: #82071e; border: 1px solid #FFCECB; }
-  .severity-bug { background: #FFF1E5; color: #953800; border: 1px solid #FFD8B5; }
-  .severity-perf { background: #FFF8C5; color: #6a5300; border: 1px solid #F4E066; }
-  .severity-style { background: #DDF4FF; color: #0550ae; border: 1px solid #B6E3FF; }
-
-  /* Issue detail cards */
-  .issue-card { border: 1px solid #d0d7de; border-radius: 8px; margin-bottom: 1rem; overflow: hidden; page-break-inside: avoid; }
-  .issue-card-header { display: flex; align-items: center; gap: 0.625rem; padding: 0.875rem 1.25rem; background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
-  .issue-card-header h3 { font-size: 0.9375rem; font-weight: 600; color: #1f2328; }
-  .issue-card-header .issue-number { color: #656d76; font-weight: 400; }
-  .issue-card-body { padding: 1.25rem; }
-  .issue-file { font-size: 0.75rem; color: #656d76; font-family: 'SF Mono', Monaco, Consolas, monospace; margin-bottom: 1rem; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1a1a1a; background: #fff; padding: 2.5rem 3rem; max-width: 860px; margin: 0 auto; line-height: 1.6; font-size: 0.875rem; }
+  h1 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .meta { color: #666; font-size: 0.8125rem; margin-bottom: 2rem; }
+  .meta a { color: #0550ae; text-decoration: none; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+  th { text-align: left; padding: 0.5rem 0; font-weight: 600; font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #d0d7de; }
+  td { padding: 0.5rem 0; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:nth-child(2) { padding-left: 0.75rem; padding-right: 0.75rem; }
+  td:nth-child(3) { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 0.75rem; color: #666; }
+  .badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.6875rem; font-weight: 500; }
+  .severity-security { background: #fee2e2; color: #991b1b; }
+  .severity-bug { background: #ffedd5; color: #9a3412; }
+  .severity-perf { background: #fef9c3; color: #854d0e; }
+  .severity-style { background: #dbeafe; color: #1e40af; }
+  h2 { font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #666; margin-bottom: 0.75rem; margin-top: 2rem; }
+  .issue { margin-bottom: 1.5rem; page-break-inside: avoid; }
+  .issue h3 { font-size: 0.9375rem; font-weight: 600; margin-bottom: 0.125rem; }
+  .issue-file { font-size: 0.75rem; color: #666; font-family: 'SF Mono', Monaco, Consolas, monospace; margin-bottom: 0.5rem; }
   .issue-file a { color: #0550ae; text-decoration: none; }
-
-  .detail-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #656d76; margin-bottom: 0.375rem; margin-top: 1rem; }
-  .detail-label:first-child { margin-top: 0; }
-  .issue-body { font-size: 0.875rem; color: #1f2328; white-space: pre-wrap; line-height: 1.6; }
-  .issue-suggestion { background: #dafbe1; border: 1px solid #aceebb; border-radius: 6px; padding: 0.875rem; margin-top: 0.375rem; font-size: 0.875rem; white-space: pre-wrap; color: #1a7f37; }
-
-  pre { background: #f6f8fa; border: 1px solid #d0d7de; padding: 0.75rem; border-radius: 6px; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0; }
+  .issue-body { white-space: pre-wrap; }
+  .issue-suggestion { background: #f6f8fa; border-left: 3px solid #1a7f37; padding: 0.625rem 0.875rem; margin-top: 0.5rem; white-space: pre-wrap; font-size: 0.8125rem; }
+  .label { font-size: 0.6875rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.25rem; margin-top: 0.75rem; }
+  pre { background: #f6f8fa; padding: 0.625rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0; }
   code { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 0.85em; }
-
-  /* Footer */
-  .footer { margin-top: 2rem; padding: 1.5rem 0; border-top: 1px solid #d0d7de; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #8b949e; }
-  .footer-logo { font-weight: 700; color: #0d1117; font-size: 0.8125rem; }
-
+  hr { border: none; border-top: 1px solid #eee; margin: 2rem 0 1rem; }
+  .footer { font-size: 0.6875rem; color: #999; }
   @media print {
     body { padding: 0; }
-    .header { padding: 1.5rem 2rem; }
-    .content { padding: 1.5rem 2rem; }
-    .issue-card { break-inside: avoid; }
+    .issue { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-inner">
-    <h1>PR Review Report</h1>
-    <div class="header-meta">
-      <span class="pr-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="#8b949e"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/></svg>
-        <a href="https://github.com/{{ review.repo }}/pull/{{ review.pr_number }}">{{ review.repo }}#{{ review.pr_number }}</a>
-      </span>
-      <span class="separator">&middot;</span>
-      <span>{{ review.created_at|date:"M d, Y" }}</span>
-    </div>
-  </div>
-</div>
-
-<div class="content">
-
-<div class="stats">
-  <div class="stat-card stat-total">
-    <span class="stat-number">{{ issues|length }}</span>
-    <span class="stat-label">Total Issues</span>
-  </div>
-  {% regroup issues by severity as severity_groups %}
-  {% for group in severity_groups %}
-  <div class="stat-card">
-    <span class="stat-number">{{ group.list|length }}</span>
-    <span class="stat-label">{{ group.grouper|title }}</span>
-  </div>
-  {% endfor %}
-</div>
+<h1>PR Review Report</h1>
+<p class="meta">
+  <a href="https://github.com/{{ review.repo }}/pull/{{ review.pr_number }}">{{ review.repo }}#{{ review.pr_number }}</a>
+  &middot; {{ review.created_at|date:"M d, Y" }}
+  &middot; {{ issues|length }} issue{{ issues|length|pluralize }}
+</p>
 
 {% if issues %}
-<p class="section-heading">Overview</p>
-<div class="table-wrapper">
 <table>
   <thead>
     <tr>
-      <th style="width:5%">#</th>
-      <th style="width:45%">Title</th>
-      <th style="width:15%">Severity</th>
-      <th style="width:35%">File</th>
+      <th>Severity</th>
+      <th>Title</th>
+      <th>File</th>
     </tr>
   </thead>
   <tbody>
     {% for issue in issues %}
     <tr>
-      <td style="color:#656d76; font-weight:500;">{{ forloop.counter }}</td>
-      <td><a href="#issue-{{ forloop.counter }}" style="color:#0550ae; text-decoration:none; font-weight:500;">{{ issue.title }}</a></td>
       <td><span class="badge severity-{{ issue.severity }}">{{ issue.get_severity_display }}</span></td>
-      <td style="font-family:'SF Mono', Monaco, Consolas, monospace; font-size:0.75rem; color:#656d76;">{{ issue.file_path }}:{{ issue.line_number }}</td>
+      <td><a href="#issue-{{ forloop.counter }}" style="color:#0550ae; text-decoration:none;">{{ issue.title }}</a></td>
+      <td>{{ issue.file_path }}:{{ issue.line_number }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
-</div>
 
-<p class="section-heading">Details</p>
+<h2>Details</h2>
 {% for issue in issues %}
-<div class="issue-card" id="issue-{{ forloop.counter }}">
-  <div class="issue-card-header">
-    <h3><span class="issue-number">{{ forloop.counter }}.</span> {{ issue.title }}</h3>
-    <span class="badge severity-{{ issue.severity }}">{{ issue.get_severity_display }}</span>
-  </div>
-  <div class="issue-card-body">
-    <p class="issue-file">
-      <a href="{{ issue.github_diff_url }}">{{ issue.file_path }}:{{ issue.line_number }}</a>
-    </p>
-
-    <p class="detail-label">Description</p>
-    <div class="issue-body">{{ issue.body }}</div>
-
-    {% if issue.suggestion %}
-    <p class="detail-label">Suggestion</p>
-    <div class="issue-suggestion">{{ issue.suggestion }}</div>
-    {% endif %}
-  </div>
+<div class="issue" id="issue-{{ forloop.counter }}">
+  <h3>{{ forloop.counter }}. {{ issue.title }} <span class="badge severity-{{ issue.severity }}">{{ issue.get_severity_display }}</span></h3>
+  <p class="issue-file"><a href="{{ issue.github_diff_url }}">{{ issue.file_path }}:{{ issue.line_number }}</a></p>
+  <div class="issue-body">{{ issue.body }}</div>
+  {% if issue.suggestion %}
+  <p class="label">Suggestion</p>
+  <div class="issue-suggestion">{{ issue.suggestion }}</div>
+  {% endif %}
 </div>
 {% endfor %}
 {% else %}
-<p style="color:#656d76; text-align:center; padding:2rem 0;">No issues found for this review.</p>
+<p style="color:#666;">No issues found for this review.</p>
 {% endif %}
 
-<div class="footer">
-  <span class="footer-logo">Loupe</span>
-  <span>{{ review.repo }} PR #{{ review.pr_number }}</span>
-</div>
+<hr>
+<p class="footer">Generated by Loupe</p>
 
-</div>
 </body>
 </html>
