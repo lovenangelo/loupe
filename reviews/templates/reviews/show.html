@@ -94,10 +94,10 @@
 
 {% if issues %}
 <div class="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
-    <table class="w-full table-fixed text-left">
+    <table class="w-full table-auto text-left">
         <thead class="bg-muted border-b border-border">
             <tr>
-                <th class="px-2 py-3 text-xs font-semibold text-muted-foreground w-8">
+                <th class="pl-3 pr-1 py-3 text-xs font-semibold text-muted-foreground" style="width:1%">
                     <input type="checkbox" id="select-all" class="rounded border-border cursor-pointer" title="Select all">
                 </th>
                 <th class="px-3 py-3 text-xs font-semibold text-muted-foreground" style="width:35%">Title</th>
@@ -110,7 +110,7 @@
             {% for issue in issues %}
             <tr class="transition-colors issue-row {% if issue.status == 'invalid' %}opacity-40{% else %}hover:bg-muted/50{% endif %}"
                 data-issue-id="{{ issue.id }}" data-status="{{ issue.status }}">
-                <td class="px-2 py-3">
+                <td class="pl-3 pr-1 py-3">
                     <input type="checkbox"
                         class="issue-checkbox rounded border-border cursor-pointer"
                         data-issue-id="{{ issue.id }}"
